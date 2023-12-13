@@ -6,10 +6,12 @@ import java.util.List;
 // User Class 
 public class User{
     private String id;
+    private long creationTime;
     private List<User> followers;
     private List<User> followings;
     private List<String> newsFeed;
     private List<Observer> observers;
+    private long lastUpdateTime;
 
     public User(String id) {
         this.id = id;
@@ -17,10 +19,16 @@ public class User{
         this.followings = new ArrayList<>();
         this.newsFeed = new ArrayList<>();
         this.observers = new ArrayList<>();
+        this.creationTime = System.currentTimeMillis();
+        this.lastUpdateTime = 0;
     }
 
     public String getId() {
         return id;
+    }
+    
+    public long getCreationTime() {
+        return creationTime;
     }
 
     public List<User> getFollowers() {
@@ -69,10 +77,13 @@ public class User{
         for (User follower : followers) {
             follower.accept(visitor);
         }
-
+        lastUpdateTime = System.currentTimeMillis();
         notifyObservers(tweet);
     }
     
+    public long getLastUpdateTime() {
+        return lastUpdateTime;
+    }
 
    
     @Override

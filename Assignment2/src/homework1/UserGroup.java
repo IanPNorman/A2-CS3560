@@ -8,12 +8,14 @@ class UserGroup {
     private String id;
     private List<User> users;
     private List<UserGroup> groups;
+    private long creationTime;
     
 
     public UserGroup(String id) {
         this.id = id;
         this.users = new ArrayList<>();
         this.groups = new ArrayList<>();
+        this.creationTime = System.currentTimeMillis();
     }
 
     public String getId() {
@@ -43,5 +45,9 @@ class UserGroup {
     @Override
     public String toString() {
         return getId();
+    }
+    
+    public long getCreationTime() {
+        return creationTime;
     }
 }

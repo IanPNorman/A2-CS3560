@@ -3,6 +3,9 @@ package homework1;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
@@ -51,7 +54,8 @@ public class MiniTwitter {
             parentGroupNode.add(groupNode);
         }
     }
-
+    
+    
     private DefaultMutableTreeNode findNode(DefaultMutableTreeNode parentNode, UserGroup group) {
         if (parentNode.getUserObject().equals(group)) {
             return parentNode;
@@ -82,6 +86,7 @@ public class MiniTwitter {
         JButton showPositiveTweetsButton = new JButton("Positive Tweets");
         JButton openUserPanelButton = new JButton("Open User Panel");
         JButton addUserToSelectedGroupButton = new JButton("Add User to Selected Group");
+        JButton verifyIDButton = new JButton("Verify IDs");
         JTextField newUserIdTextField = new JTextField(15);
 
 
@@ -130,6 +135,10 @@ public class MiniTwitter {
         panel.add(showTotalTweetsButton, constraints);
         constraints.gridx++;
         panel.add(showPositiveTweetsButton, constraints);
+        
+        constraints.gridx = 0;
+        constraints.gridy++;
+        panel.add(verifyIDButton, constraints);
 
         constraints.gridx = 0;
         constraints.gridy++;
@@ -147,6 +156,18 @@ public class MiniTwitter {
                     User newUser = new User(userId);
                     addUser(newUser, rootGroup);
                     userIdTextField.setText("");
+                }
+            }
+        });
+        
+        verifyIDButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                boolean idsValid = verifyIDs();
+                if (idsValid) {
+                    JOptionPane.showMessageDialog(frame, "All IDs are valid!");
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Some invalid IDs. They are printed in the console.");
                 }
             }
         });
@@ -301,6 +322,46 @@ public class MiniTwitter {
         }
         return false;
     }
+    
+    public boolean verifyIDs() {
+        Set<String> idSet = new HashSet<>();
+        return verifyIDs(rootNode, idSet);
+    }
+
+    private boolean verifyIDs(DefaultMutableTreeNode node, Set<String> idSet) {
+        if (node.getUserObject() instanceof User) {
+            User user = (User) node.getUserObject();
+            String userID = user.getId();
+            if (userID.contains(" ")) {
+                System.out.println("Invalid Spaces in user IDs: " + userID);
+                return false;
+            } else if (idSet.contains(userID)) {
+                System.out.println("Duplicate user IDs: " + userID);
+                return false;
+            }
+            idSet.add(userID);
+        } else if (node.getUserObject() instanceof UserGroup) {
+            UserGroup group = (UserGroup) node.getUserObject();
+            String groupID = group.getId();
+            if (groupID.contains(" ")) {
+                System.out.println("Invalid Spaces in groupIDs: " + groupID);
+                return false;
+            } else if (idSet.contains(groupID)) {
+                System.out.println("Duplicate group IDs: " + groupID);
+                return false;
+            }
+            idSet.add(groupID);
+        }
+
+        int childCount = node.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) node.getChildAt(i);
+            if (!verifyIDs(childNode, idSet)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     public void displayUserView(User user) {
         JFrame frame = new JFrame(user.getId() + " User View");
@@ -321,6 +382,11 @@ public class MiniTwitter {
 
         JTextField tweetTextField = new JTextField(15);
         JButton postTweetButton = new JButton("Post Tweet");
+        
+        JLabel creationTimeLabel = new JLabel("Creation Time: " + user.getCreationTime());
+        
+        JLabel lastUpdateTimeLabel = new JLabel("Last Update Time: " + user.getLastUpdateTime());
+
 
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints constraints = new GridBagConstraints();
@@ -362,6 +428,10 @@ public class MiniTwitter {
         panel.add(tweetTextField, constraints);
         constraints.gridx++;
         panel.add(postTweetButton, constraints);
+        constraints.gridy++;
+        panel.add(creationTimeLabel, constraints);
+        constraints.gridy++;
+        panel.add(lastUpdateTimeLabel, constraints);
 
         for (User following : user.getFollowings()) {
             followingListModel.addElement(following.getId());
